@@ -5,7 +5,8 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 
 //==============================================================================
-class PluginEditor : public juce::AudioProcessorEditor, private juce::Slider::Listener
+class PluginEditor :    public juce::AudioProcessorEditor, 
+                        private juce::Slider::Listener
 {
 public:
     explicit PluginEditor (PluginProcessor&);

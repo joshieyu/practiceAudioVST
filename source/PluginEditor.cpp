@@ -5,24 +5,30 @@ PluginEditor::PluginEditor (PluginProcessor& p)
 {
     juce::ignoreUnused (processorRef);
 
-    gainSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
+    setSize (400, 300);
+
+    gainSlider.setSliderStyle (juce::Slider::LinearBarVertical);
     gainSlider.setRange (0.0, 1.0, 0.1);
     gainSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 90, 0);
     gainSlider.setTextValueSuffix (" Gain");
     gainSlider.setValue(0.5);
+    gainSlider.addListener (this);
 
+    addAndMakeVisible (&gainSlider);
 
-
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
 }
 
 PluginEditor::~PluginEditor()
 {
 }
 
-void PluginEditor::sliderValueChanged(juce::Slider* slider);
+void PluginEditor::sliderValueChanged(juce::Slider* slider)
+{
+    processorRef.gain->operator=(gainSlider.getValue());
+    //PluginProcessor.parameters.getParameter
+}
 
 void PluginEditor::paint (juce::Graphics& g)
 {
@@ -36,6 +42,5 @@ void PluginEditor::paint (juce::Graphics& g)
 void PluginEditor::resized()
 {
     // layout the positions of your child components here
-    auto area = getLocalBounds();
-    area.removeFromBottom(50);
+    gainSlider.setBounds (40, 30, 20, getHeight() - 60);
 }
