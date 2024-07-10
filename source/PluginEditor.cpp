@@ -1,22 +1,19 @@
 #include "PluginEditor.h"
 
-PluginEditor::PluginEditor (PluginProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& vts)
+    : AudioProcessorEditor (&p), processorRef (p), valueTreeState(vts)
 {
-    juce::ignoreUnused (processorRef);
+    gainLabel.setText ("Gain", juce::dontSendNotification);
+    addAndMakeVisible (gainLabel);
 
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    addAndMakeVisible (gainSlider);
+    gainAttachment.reset (new SliderAttachment (valueTreeState, "gain", gainSlider));
 
-    gainSlider.setSliderStyle (juce::Slider::LinearBarVertical);
-    gainSlider.setRange (0.0, 1.0, 0.1);
-    gainSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 90, 0);
-    gainSlider.setTextValueSuffix (" Gain");
-    gainSlider.setValue(0.5);
-    gainSlider.addListener (this);
+    invertButton.setButtonText ("Invert Phase");
+    addAndMakeVisible (invertButton);
+    invertAttachment.reset (new ButtonAttachment (valueTreeState, "invertPhase", invertButton));
 
-    addAndMakeVisible (&gainSlider);
+    setSize (paramSliderWidth + paramLabelWidth, juce::jmax (100, paramControlHeight * 2));
 
 }
 
@@ -24,23 +21,29 @@ PluginEditor::~PluginEditor()
 {
 }
 
-void PluginEditor::sliderValueChanged(juce::Slider* slider)
-{
-    processorRef.gain->operator=(gainSlider.getValue());
-    //PluginProcessor.parameters.getParameter
-}
 
 void PluginEditor::paint (juce::Graphics& g)
 {
 
-    g.fillAll (juce::Colours::white);
+    /*g.fillAll (juce::Colours::white);
     g.setColour (juce::Colours::black);
-    g.setFont (16.0f);
-    g.drawFittedText ("Gain", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.setFont (16.0f);*/
+    //g.drawFittedText ("Gain", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 }
 
 void PluginEditor::resized()
 {
     // layout the positions of your child components here
-    gainSlider.setBounds (40, 30, 20, getHeight() - 60);
+    //gainSlider.setBounds (40, 30, 20, getHeight() - 60);
+
+    auto r = getLocalBounds();
+
+    auto gainRect = r.removeFromTop (paramControlHeight);
+    gainLabel.setBounds (gainRect.removeFromLeft (paramLabelWidth));
+    gainSlider.setBounds (gainRect);
+
+    invertButton.setBounds (r.removeFromTop (paramControlHeight));
+
+
 }

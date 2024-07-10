@@ -10,16 +10,22 @@ PluginProcessor::PluginProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+      parameters(*this, nullptr, juce::Identifier("APVTSTutorial"),
+          {
+            std::make_unique<juce::AudioParameterFloat>("gain",            // parameterID
+                                                        "Gain",            // parameter name
+                                                        0.0f,              // minimum value
+                                                        1.0f,              // maximum value
+                                                        0.5f),             // default value
+            std::make_unique<juce::AudioParameterBool> ("invertPhase",      // parameterID
+                                                        "Invert Phase",     // parameter name
+                                                        false)              // default value
+          })
 {
-    addParameter (gain = new juce::AudioParameterFloat (
-        "gain", // unique parameter ID
-        "Gain", // Displayed parameter name
-        juce::NormalisableRange<float> (0.0f, 1.0f),
-        0.5f
-    )
-    );
-}
+    phaseParameter = parameters.getRawParameterValue ("invertPhase");
+    gainParameter = parameters.getRawParameterValue ("gain");
+      }
 
 PluginProcessor::~PluginProcessor()
 {
@@ -93,6 +99,9 @@ void PluginProcessor::changeProgramName (int index, const juce::String& newName)
 //==============================================================================
 void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
+    previousGain = *gainParameter * phase;
+    
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused (sampleRate, samplesPerBlock);
@@ -129,7 +138,19 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
-    buffer.applyGain (*gain);
+    auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
+    auto currentGain = *gainParameter * phase;
+
+    if (juce::approximatelyEqual(currentGain, previousGain))
+    {
+        buffer.applyGain (currentGain);
+    }
+    else
+    {
+        buffer.applyGainRamp (0, buffer.getNumChannels(), previousGain, currentGain);
+        previousGain = currentGain;
+    }
+    
 }
 
 //==============================================================================
@@ -140,7 +161,7 @@ bool PluginProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PluginProcessor::createEditor()
 {
-    return new PluginEditor (*this);
+    return new PluginEditor (*this, parameters);
 }
 
 //==============================================================================
@@ -150,8 +171,9 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You could do that either as raw data, or use the XML or ValueTree classes
     
     // as intermediaries to make it easy to save and load complex data.
-    juce::MemoryOutputStream (destData, true).writeFloat (*gain);
-    juce::ignoreUnused (destData);
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -159,8 +181,11 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     
-    *gain = juce::MemoryInputStream (data, static_cast<size_t> (sizeInBytes), false).readFloat();
-    juce::ignoreUnused (data, sizeInBytes);
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (parameters.state.getType()))
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================

@@ -28,7 +28,7 @@ set(PROJECT_NAME "practiceAudioVST")
 set(PRODUCT_NAME "practiceAudioVST")
 
 # Change me! Used for the MacOS bundle name and Installers
-set(COMPANY_NAME "Pamplejuce woshieDev")
+set(COMPANY_NAME "woshieDev")
 
 # Change me! Used for the MacOS bundle identifier (and signing)
 set(BUNDLE_ID "com.pamplejuce.pamplejuce")

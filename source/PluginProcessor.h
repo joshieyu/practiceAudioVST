@@ -7,6 +7,7 @@
 #endif
 
 class PluginProcessor : public juce::AudioProcessor
+                      
 {
 public:
     PluginProcessor();
@@ -38,9 +39,14 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    juce::AudioParameterFloat* gain;
 
 private:
+
+    juce::AudioProcessorValueTreeState parameters;
+    float previousGain;
+
+    std::atomic<float>* phaseParameter = nullptr;
+    std::atomic<float>* gainParameter = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
