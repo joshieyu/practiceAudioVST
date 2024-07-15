@@ -2,6 +2,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "LowpassHighpassFilter.hpp"
+
 #if (MSVC)
 #include "ipps.h"
 #endif
@@ -47,6 +49,11 @@ private:
 
     std::atomic<float>* phaseParameter = nullptr;
     std::atomic<float>* gainParameter = nullptr;
+    
+    std::atomic<float>* cutoffFrequencyParameter = nullptr;
+    std::atomic<float>* highpassParameter = nullptr; // bool stored as float; recommended by JUCE
+
+    LowpassHighpassFilter filter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

@@ -11,7 +11,7 @@ PluginProcessor::PluginProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-      parameters(*this, nullptr, juce::Identifier("APVTSTutorial"),
+      parameters(*this, nullptr, juce::Identifier("FilterPlugin"),
           {
             std::make_unique<juce::AudioParameterFloat>("gain",            // parameterID
                                                         "Gain",            // parameter name
@@ -20,12 +20,19 @@ PluginProcessor::PluginProcessor()
                                                         0.5f),             // default value
             std::make_unique<juce::AudioParameterBool> ("invertPhase",      // parameterID
                                                         "Invert Phase",     // parameter name
-                                                        false)              // default value
+                                                        false),              // default value
+            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency", 
+                                                        "Cutoff Frequency", 
+                                                        juce::NormalisableRange{20.f, 20000.f, 0.1f, 0.2f, false},
+                                                        500.f),
+            std::make_unique<juce::AudioParameterBool>("highpass", "Highpass", false)
           })
 {
     phaseParameter = parameters.getRawParameterValue ("invertPhase");
     gainParameter = parameters.getRawParameterValue ("gain");
-      }
+    cutoffFrequencyParameter = parameters.getRawParameterValue("cutoff_frequencu");
+    highpassParameter = parameters.getRawParameterValue("highpass");
+}
 
 PluginProcessor::~PluginProcessor()
 {
@@ -101,6 +108,8 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
     previousGain = *gainParameter * phase;
+
+    filter.setSamplingRate(static_cast<float>(sampleRate));
     
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -138,8 +147,22 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
+    auto totalNumInputChannels = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
     auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
     auto currentGain = *gainParameter * phase;
+
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear(i, 0, buffer.getNumSamples());
+
+    const auto cutoffFrequency = cutoffFrequencyParameter->load();
+    const auto highpass = *highpassParameter < 0.5f ? false : true;
+
+    filter.setCutoffFrequency(cutoffFrequency);
+    filter.setHighpass(highpass);
+
+    filter.processBlock(buffer, midiMessages);
 
     if (juce::approximatelyEqual(currentGain, previousGain))
     {

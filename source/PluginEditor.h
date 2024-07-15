@@ -20,22 +20,30 @@ public:
     void resized() override;
 
     enum {
-        paramControlHeight = 40,
-        paramLabelWidth = 80,
-        paramSliderWidth = 300
+        paramWidth = 75,
+        paramHeight = 200,
+        buttonHeight = 50
     };
 
 private:
-    //void sliderValueChanged (juce::Slider* slider) override;
     juce::AudioProcessorValueTreeState& valueTreeState;
+
     juce::Slider gainSlider;
     juce::Label gainLabel;
     std::unique_ptr<SliderAttachment> gainAttachment;
 
     juce::ToggleButton invertButton;
     std::unique_ptr<ButtonAttachment> invertAttachment;
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
+
+    juce::Slider cutoffFrequencySlider;
+    std::unique_ptr<SliderAttachment> cutoffFrequencyAttachment;
+    juce::Label cutoffFrequencyLabel;
+
+    juce::ToggleButton highpassButton;
+    std::unique_ptr<ButtonAttachment> highpassAttachment;
+    juce::Label highpassButtonLabel;
+   
+
     PluginProcessor& processorRef;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEditor)
 };

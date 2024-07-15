@@ -3,17 +3,38 @@
 PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processorRef (p), valueTreeState(vts)
 {
-    gainLabel.setText ("Gain", juce::dontSendNotification);
-    addAndMakeVisible (gainLabel);
 
+    // Gain Slider and label
     addAndMakeVisible (gainSlider);
-    gainAttachment.reset (new SliderAttachment (valueTreeState, "gain", gainSlider));
+    gainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    gainAttachment.reset(new SliderAttachment (valueTreeState, "gain", gainSlider));
 
-    invertButton.setButtonText ("Invert Phase");
+    addAndMakeVisible (gainLabel);
+    gainLabel.setText("Gain", juce::dontSendNotification);
+
+    // Phase invert toggle 
     addAndMakeVisible (invertButton);
+    invertButton.setButtonText ("Invert Phase");
     invertAttachment.reset (new ButtonAttachment (valueTreeState, "invertPhase", invertButton));
 
-    setSize (paramSliderWidth + paramLabelWidth, juce::jmax (100, paramControlHeight * 2));
+    // Cutoff frequency slider and label + attachment
+    addAndMakeVisible(cutoffFrequencySlider);
+    cutoffFrequencySlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    cutoffFrequencyAttachment
+    .reset(new SliderAttachment(vts, "cutoff_frequency", cutoffFrequencySlider));
+
+    addAndMakeVisible(cutoffFrequencyLabel);
+    cutoffFrequencyLabel.setText("Cutoff Frequency", juce::dontSendNotification);
+
+    // Highpass toggle button, label, attachment
+    addAndMakeVisible(highpassButton);
+    highpassAttachment.reset(new ButtonAttachment(vts, "highpass", highpassButton));
+
+    addAndMakeVisible(highpassButtonLabel);
+    highpassButtonLabel.setText("Highpass", juce::dontSendNotification);
+
+
+    setSize (3 * paramWidth, paramHeight);
 
 }
 
@@ -30,6 +51,9 @@ void PluginEditor::paint (juce::Graphics& g)
     g.setFont (16.0f);*/
     //g.drawFittedText ("Gain", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
+    g.setColour(juce::Colours::white);
+    g.setFont(15.0f);
 }
 
 void PluginEditor::resized()
@@ -39,11 +63,16 @@ void PluginEditor::resized()
 
     auto r = getLocalBounds();
 
-    auto gainRect = r.removeFromTop (paramControlHeight);
-    gainLabel.setBounds (gainRect.removeFromLeft (paramLabelWidth));
+    auto gainRect = r.removeFromLeft (paramWidth / 2);
+    invertButton.setBounds(gainRect.removeFromBottom(buttonHeight));
+    gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
     gainSlider.setBounds (gainRect);
 
-    invertButton.setBounds (r.removeFromTop (paramControlHeight));
+    auto filterRect = r. removeFromLeft(paramWidth / 2);
+    highpassButton.setBounds(filterRect.removeFromBottom(buttonHeight));
+    cutoffFrequencyLabel.setBounds(filterRect.removeFromBottom(buttonHeight));
+    cutoffFrequencySlider.setBounds(filterRect);
+
 
 
 }
