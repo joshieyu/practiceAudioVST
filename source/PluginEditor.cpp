@@ -28,13 +28,14 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     // Highpass toggle button, label, attachment
     addAndMakeVisible(highpassButton);
+    highpassButton.setButtonText ("Highpass");
     highpassAttachment.reset(new ButtonAttachment(vts, "highpass", highpassButton));
 
     addAndMakeVisible(highpassButtonLabel);
     highpassButtonLabel.setText("Highpass", juce::dontSendNotification);
 
 
-    setSize (3 * paramWidth, paramHeight);
+    setSize (2 * paramWidth, paramHeight);
 
 }
 
@@ -63,12 +64,12 @@ void PluginEditor::resized()
 
     auto r = getLocalBounds();
 
-    auto gainRect = r.removeFromLeft (paramWidth / 2);
+    auto gainRect = r.removeFromLeft (paramWidth);
     invertButton.setBounds(gainRect.removeFromBottom(buttonHeight));
     gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
     gainSlider.setBounds (gainRect);
 
-    auto filterRect = r. removeFromLeft(paramWidth / 2);
+    auto filterRect = r. removeFromLeft(paramWidth);
     highpassButton.setBounds(filterRect.removeFromBottom(buttonHeight));
     cutoffFrequencyLabel.setBounds(filterRect.removeFromBottom(buttonHeight));
     cutoffFrequencySlider.setBounds(filterRect);

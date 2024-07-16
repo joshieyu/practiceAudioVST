@@ -20,8 +20,8 @@ public:
     void resized() override;
 
     enum {
-        paramWidth = 75,
-        paramHeight = 200,
+        paramWidth = 200,
+        paramHeight = 500,
         buttonHeight = 50
     };
 

@@ -30,7 +30,7 @@ PluginProcessor::PluginProcessor()
 {
     phaseParameter = parameters.getRawParameterValue ("invertPhase");
     gainParameter = parameters.getRawParameterValue ("gain");
-    cutoffFrequencyParameter = parameters.getRawParameterValue("cutoff_frequencu");
+    cutoffFrequencyParameter = parameters.getRawParameterValue("cutoff_frequency");
     highpassParameter = parameters.getRawParameterValue("highpass");
 }
 
@@ -173,7 +173,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.applyGainRamp (0, buffer.getNumChannels(), previousGain, currentGain);
         previousGain = currentGain;
     }
-    
+  
+   
 }
 
 //==============================================================================
