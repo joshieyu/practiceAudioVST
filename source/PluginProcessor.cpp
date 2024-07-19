@@ -109,6 +109,13 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
     previousGain = *gainParameter * phase;
 
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = getTotalNumInputChannels();
+
+    convolution.reset();
+    convolution.prepare (spec);
+
     filter.setSamplingRate(static_cast<float>(sampleRate));
     
     // Use this method as the place to do any pre-playback
@@ -147,8 +154,16 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
+    juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    juce::dsp::AudioBlock<float> block { buffer };
+
+
+   
+  
+    
 
     auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
     auto currentGain = *gainParameter * phase;
@@ -156,6 +171,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    convolution.process (juce::dsp::ProcessContextReplacing<float> (block));
     const auto cutoffFrequency = cutoffFrequencyParameter->load();
     const auto highpass = *highpassParameter < 0.5f ? false : true;
 

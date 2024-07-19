@@ -3,6 +3,8 @@
 #include "PluginProcessor.h"
 #include "BinaryData.h"
 #include "melatonin_inspector/melatonin_inspector.h"
+#include <juce_audio_formats/format/juce_AudioFormatManager.h>
+#include <juce_gui_basics/filebrowser/juce_FileChooser.h>
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -42,7 +44,12 @@ private:
     juce::ToggleButton highpassButton;
     std::unique_ptr<ButtonAttachment> highpassAttachment;
     juce::Label highpassButtonLabel;
+
+    void openButtonClicked();
+    juce::TextButton openButton;
    
+    juce::AudioFormatManager formatManager; 
+    std::unique_ptr<juce::FileChooser> chooser;
 
     PluginProcessor& processorRef;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEditor)

@@ -34,13 +34,45 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     addAndMakeVisible(highpassButtonLabel);
     highpassButtonLabel.setText("Highpass", juce::dontSendNotification);
 
+    processorRef.root = juce::File::getSpecialLocation (juce::File::userDesktopDirectory);
 
-    setSize (2 * paramWidth, paramHeight);
+    // Open file button for convolution reverb
+    addAndMakeVisible (openButton);
+    openButton.setButtonText ("Open IR File");
+    openButton.onClick = [this] { openButtonClicked(); };
+
+    formatManager.registerBasicFormats();
+
+    setSize (3 * paramWidth, paramHeight);
 
 }
 
 PluginEditor::~PluginEditor()
 {
+}
+
+void PluginEditor::openButtonClicked()
+{
+    DBG ("clicked");
+    // choose a file
+    chooser = std::make_unique<juce::FileChooser> ("Choose a WAV or AIFF File", processorRef.root, "*.wav;*.aiff", true, false, nullptr);
+
+
+    // if user chooses a file
+    chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+        [this] (const juce::FileChooser& fc) {
+            auto file = fc.getResult();
+            DBG ("getting to here?");
+            if (file.existsAsFile())
+            {
+                DBG ("successful, file exists");
+                //processor.loadImpulseResponse (file);
+                processorRef.savedFile = file;
+                processorRef.root = file.getParentDirectory().getFullPathName(); // Change default open directory
+                processorRef.convolution.reset();
+                processorRef.convolution.loadImpulseResponse (file, juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::yes, 0);
+            }
+        });
 }
 
 
@@ -73,6 +105,9 @@ void PluginEditor::resized()
     highpassButton.setBounds(filterRect.removeFromBottom(buttonHeight));
     cutoffFrequencyLabel.setBounds(filterRect.removeFromBottom(buttonHeight));
     cutoffFrequencySlider.setBounds(filterRect);
+
+    auto reverbRect = r.removeFromLeft (paramWidth);
+    openButton.setBounds (reverbRect.removeFromBottom (buttonHeight));
 
 
 

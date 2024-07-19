@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 #include "LowpassHighpassFilter.hpp"
 
@@ -41,8 +42,13 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    juce::File root, savedFile;
 
+    juce::dsp::Convolution convolution;
 private:
+
+
+
 
     juce::AudioProcessorValueTreeState parameters;
     float previousGain;
@@ -54,6 +60,7 @@ private:
     std::atomic<float>* highpassParameter = nullptr; // bool stored as float; recommended by JUCE
 
     LowpassHighpassFilter filter;
+    juce::dsp::ProcessSpec spec;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
