@@ -12,7 +12,6 @@
 #endif
 
 class PluginProcessor : public juce::AudioProcessor
-                      
 {
 public:
     PluginProcessor();

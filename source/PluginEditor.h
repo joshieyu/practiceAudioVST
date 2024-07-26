@@ -50,6 +50,8 @@ private:
     juce::AudioFormatManager formatManager; 
     std::unique_ptr<juce::FileChooser> chooser;
 
+    juce::Label irName;
+
     PluginProcessor& processorRef;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEditor)
 };

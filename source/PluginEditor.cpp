@@ -43,6 +43,8 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     formatManager.registerBasicFormats();
 
+    addAndMakeVisible (irName);
+
     setSize (3 * paramWidth, paramHeight);
 
 }
@@ -55,7 +57,7 @@ void PluginEditor::openButtonClicked()
 {
     DBG ("clicked");
     // choose a file
-    chooser = std::make_unique<juce::FileChooser> ("Choose a WAV or AIFF File", processorRef.root, "*.wav;*.aiff", true, false, nullptr);
+    chooser = std::make_unique<juce::FileChooser> ("Choose a WAV or AIFF File", processorRef.root, "*.wav;*.aiff;*.mp3", true, false, nullptr);
 
 
     // if user chooses a file
@@ -71,6 +73,7 @@ void PluginEditor::openButtonClicked()
                 processorRef.root = file.getParentDirectory().getFullPathName(); // Change default open directory
                 processorRef.convolution.reset();
                 processorRef.convolution.loadImpulseResponse (file, juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::yes, 0);
+                irName.setText (file.getFileName(), juce::dontSendNotification);
             }
         });
 }
@@ -107,7 +110,8 @@ void PluginEditor::resized()
     cutoffFrequencySlider.setBounds(filterRect);
 
     auto reverbRect = r.removeFromLeft (paramWidth);
-    openButton.setBounds (reverbRect.removeFromBottom (buttonHeight));
+    openButton.setBounds (reverbRect.removeFromBottom (200));
+    irName.setBounds (reverbRect.removeFromBottom (40));
 
 
 
