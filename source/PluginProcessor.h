@@ -47,20 +47,17 @@ public:
 
     juce::dsp::Convolution convolution;
 private:
-
-
-
-
     juce::AudioProcessorValueTreeState parameters;
     float previousGain;
 
     std::atomic<float>* phaseParameter = nullptr;
     std::atomic<float>* gainParameter = nullptr;
     
-    std::atomic<float>* cutoffFrequencyParameter = nullptr;
-    std::atomic<float>* highpassParameter = nullptr; // bool stored as float; recommended by JUCE
+    std::atomic<float>* cutoffFrequencyParameterHigh = nullptr;
+    std::atomic<float>* cutoffFrequencyParameterLow = nullptr;
 
-    LowpassHighpassFilter filter;
+    LowpassHighpassFilter highFilter;
+    LowpassHighpassFilter lowFilter;
     juce::dsp::ProcessSpec spec;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)

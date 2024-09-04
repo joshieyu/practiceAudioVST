@@ -21,17 +21,20 @@ PluginProcessor::PluginProcessor()
             std::make_unique<juce::AudioParameterBool> ("invertPhase",      // parameterID
                                                         "Invert Phase",     // parameter name
                                                         false),              // default value
-            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency", 
-                                                        "Cutoff Frequency", 
+            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency_high", 
+                                                        "Cutoff Frequency High", 
                                                         juce::NormalisableRange{20.f, 20000.f, 0.1f, 0.2f, false},
                                                         500.f),
-            std::make_unique<juce::AudioParameterBool>("highpass", "Highpass", false)
+            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency_low", 
+                                                        "Cutoff Frequency Low", 
+                                                        juce::NormalisableRange{20.f, 20000.f, 0.1f, 0.2f, false},
+                                                        500.f)
           })
 {
     phaseParameter = parameters.getRawParameterValue ("invertPhase");
     gainParameter = parameters.getRawParameterValue ("gain");
-    cutoffFrequencyParameter = parameters.getRawParameterValue("cutoff_frequency");
-    highpassParameter = parameters.getRawParameterValue("highpass");
+    cutoffFrequencyParameterLow = parameters.getRawParameterValue("cutoff_frequency_low");
+    cutoffFrequencyParameterHigh = parameters.getRawParameterValue("cutoff_frequency_high");
 }
 
 PluginProcessor::~PluginProcessor()
@@ -116,7 +119,8 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     convolution.reset();
     convolution.prepare (spec);
 
-    filter.setSamplingRate(static_cast<float>(sampleRate));
+    lowFilter.setSamplingRate(static_cast<float>(sampleRate));
+    highFilter.setSamplingRate(static_cast<float>(sampleRate));
     
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -160,11 +164,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     juce::dsp::AudioBlock<float> block { buffer };
 
-
-   
-  
-    
-
     auto phase = *phaseParameter < 0.5f ? 1.0f : -1.0f;
     auto currentGain = *gainParameter * phase;
 
@@ -172,13 +171,16 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear(i, 0, buffer.getNumSamples());
 
     convolution.process (juce::dsp::ProcessContextReplacing<float> (block));
-    const auto cutoffFrequency = cutoffFrequencyParameter->load();
-    const auto highpass = *highpassParameter < 0.5f ? false : true;
+    const auto cutoffFrequencyLow = cutoffFrequencyParameterLow->load();
+    const auto cutoffFrequencyHigh = cutoffFrequencyParameterHigh->load();
 
-    filter.setCutoffFrequency(cutoffFrequency);
-    filter.setHighpass(highpass);
+    lowFilter.setCutoffFrequency(cutoffFrequencyLow);
+    highFilter.setCutoffFrequency(cutoffFrequencyHigh);
+    lowFilter.setHighpass(false);
+    highFilter.setHighpass(true);
 
-    filter.processBlock(buffer, midiMessages);
+    lowFilter.processBlock(buffer, midiMessages);
+    highFilter.processBlock(buffer, midiMessages);
 
     if (juce::approximatelyEqual(currentGain, previousGain))
     {
@@ -189,8 +191,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.applyGainRamp (0, buffer.getNumChannels(), previousGain, currentGain);
         previousGain = currentGain;
     }
-  
-   
 }
 
 //==============================================================================

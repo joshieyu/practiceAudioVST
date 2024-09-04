@@ -36,13 +36,18 @@ private:
     juce::ToggleButton invertButton;
     std::unique_ptr<ButtonAttachment> invertAttachment;
 
-    juce::Slider cutoffFrequencySlider;
-    std::unique_ptr<SliderAttachment> cutoffFrequencyAttachment;
-    juce::Label cutoffFrequencyLabel;
+    juce::Slider cutoffFrequencySliderLow;
+    std::unique_ptr<SliderAttachment> cutoffFrequencyAttachmentLow;
+    juce::Label cutoffFrequencyLabelLow;
 
-    juce::ToggleButton highpassButton;
-    std::unique_ptr<ButtonAttachment> highpassAttachment;
-    juce::Label highpassButtonLabel;
+    juce::Slider cutoffFrequencySliderHigh;
+    std::unique_ptr<SliderAttachment> cutoffFrequencyAttachmentHigh;
+    juce::Label cutoffFrequencyLabelHigh;
+
+    juce::Image MSBVerb;
+    juce::Image IEEELogo;
+    juce::ImageComponent MSBVerbComponent;
+    juce::ImageComponent IEEELogoComponent;
 
     void openButtonClicked();
     juce::TextButton openButton;

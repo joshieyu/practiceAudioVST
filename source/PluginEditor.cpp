@@ -3,10 +3,21 @@
 PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processorRef (p), valueTreeState(vts)
 {
+    // Color palette
+    getLookAndFeel().setColour(juce::Slider::thumbColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff9f937d));
+    getLookAndFeel().setColour(juce::Slider::textBoxTextColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::Label::textColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::ToggleButton::textColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::ToggleButton::tickColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::ToggleButton::tickDisabledColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::TextButton::buttonColourId, juce::Colour(0xff444137));
+    getLookAndFeel().setColour(juce::TextButton::textColourOnId, juce::Colour(0xffE0D7C6));
 
     // Gain Slider and label
     addAndMakeVisible (gainSlider);
-    gainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    gainSlider.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     gainAttachment.reset(new SliderAttachment (valueTreeState, "gain", gainSlider));
 
     addAndMakeVisible (gainLabel);
@@ -17,22 +28,21 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     invertButton.setButtonText ("Invert Phase");
     invertAttachment.reset (new ButtonAttachment (valueTreeState, "invertPhase", invertButton));
 
-    // Cutoff frequency slider and label + attachment
-    addAndMakeVisible(cutoffFrequencySlider);
-    cutoffFrequencySlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    cutoffFrequencyAttachment
-    .reset(new SliderAttachment(vts, "cutoff_frequency", cutoffFrequencySlider));
+    // Cutoff low frequency slider and label + attachment
+    addAndMakeVisible(cutoffFrequencySliderLow);
+    cutoffFrequencySliderLow.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    cutoffFrequencyAttachmentLow.reset(new SliderAttachment(vts, "cutoff_frequency_low", cutoffFrequencySliderLow));
 
-    addAndMakeVisible(cutoffFrequencyLabel);
-    cutoffFrequencyLabel.setText("Cutoff Frequency", juce::dontSendNotification);
+    addAndMakeVisible(cutoffFrequencyLabelLow);
+    cutoffFrequencyLabelLow.setText("Cutoff Frequency Low", juce::dontSendNotification);
 
-    // Highpass toggle button, label, attachment
-    addAndMakeVisible(highpassButton);
-    highpassButton.setButtonText ("Highpass");
-    highpassAttachment.reset(new ButtonAttachment(vts, "highpass", highpassButton));
+    // Cutoff high frequency slider and label + attachment
+    addAndMakeVisible(cutoffFrequencySliderHigh);
+    cutoffFrequencySliderHigh.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    cutoffFrequencyAttachmentHigh.reset(new SliderAttachment(vts, "cutoff_frequency_high", cutoffFrequencySliderHigh));
 
-    addAndMakeVisible(highpassButtonLabel);
-    highpassButtonLabel.setText("Highpass", juce::dontSendNotification);
+    addAndMakeVisible(cutoffFrequencyLabelHigh);
+    cutoffFrequencyLabelHigh.setText("Cutoff Frequency High", juce::dontSendNotification);
 
     processorRef.root = juce::File::getSpecialLocation (juce::File::userDesktopDirectory);
 
@@ -45,7 +55,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     addAndMakeVisible (irName);
 
-    setSize (3 * paramWidth, paramHeight);
+    setSize (4 * paramWidth, paramHeight);
 
 }
 
@@ -58,7 +68,6 @@ void PluginEditor::openButtonClicked()
     DBG ("clicked");
     // choose a file
     chooser = std::make_unique<juce::FileChooser> ("Choose a WAV or AIFF File", processorRef.root, "*.wav;*.aiff;*.mp3", true, false, nullptr);
-
 
     // if user chooses a file
     chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
@@ -86,9 +95,9 @@ void PluginEditor::paint (juce::Graphics& g)
     g.setColour (juce::Colours::black);
     g.setFont (16.0f);*/
     //g.drawFittedText ("Gain", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (juce::Colour(0xffE0D7C6));
 
-    g.setColour(juce::Colours::white);
+    g.setColour(juce::Colour(0xff444137));
     g.setFont(15.0f);
 }
 
@@ -104,15 +113,15 @@ void PluginEditor::resized()
     gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
     gainSlider.setBounds (gainRect);
 
-    auto filterRect = r. removeFromLeft(paramWidth);
-    highpassButton.setBounds(filterRect.removeFromBottom(buttonHeight));
-    cutoffFrequencyLabel.setBounds(filterRect.removeFromBottom(buttonHeight));
-    cutoffFrequencySlider.setBounds(filterRect);
+    auto lowFilterRect = r. removeFromLeft(paramWidth);
+    cutoffFrequencyLabelLow.setBounds(lowFilterRect.removeFromBottom(buttonHeight));
+    cutoffFrequencySliderLow.setBounds(lowFilterRect);
+
+    auto highFilterRect = r. removeFromLeft(paramWidth);
+    cutoffFrequencyLabelHigh.setBounds(highFilterRect.removeFromBottom(buttonHeight));
+    cutoffFrequencySliderHigh.setBounds(highFilterRect);
 
     auto reverbRect = r.removeFromLeft (paramWidth);
     openButton.setBounds (reverbRect.removeFromBottom (200));
     irName.setBounds (reverbRect.removeFromBottom (40));
-
-
-
 }
