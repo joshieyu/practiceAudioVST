@@ -67,7 +67,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # Change me!
     # A four-character plugin id
     # First character MUST be uppercase for AU formats
-    PLUGIN_MANUFACTURER_CODE PAPL
+    PLUGIN_MANUFACTURER_CODE PVST
 
     # Change me!
     # A unique four-character plugin id
@@ -79,7 +79,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # This is how it's listed in the DAW
     # This can be different from PROJECT_NAME and can have spaces!
     # You might want to use v${MAJOR_VERSION} here once you go to v2...
-    PRODUCT_NAME "${PRODUCT_NAME}")
+    PRODUCT_NAME "${PVST}")
 
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
