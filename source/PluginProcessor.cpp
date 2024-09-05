@@ -24,11 +24,11 @@ PluginProcessor::PluginProcessor()
             std::make_unique<juce::AudioParameterFloat>("cutoff_frequency_high", 
                                                         "Cutoff Frequency High", 
                                                         juce::NormalisableRange{20.f, 20000.f, 0.1f, 0.2f, false},
-                                                        500.f),
-            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency_low", 
+                                                        20000.f),
+            std::make_unique<juce::AudioParameterFloat>("cutoff_frequency_low",
                                                         "Cutoff Frequency Low", 
                                                         juce::NormalisableRange{20.f, 20000.f, 0.1f, 0.2f, false},
-                                                        500.f)
+                                                        20.f)
           })
 {
     phaseParameter = parameters.getRawParameterValue ("invertPhase");
@@ -176,8 +176,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     lowFilter.setCutoffFrequency(cutoffFrequencyLow);
     highFilter.setCutoffFrequency(cutoffFrequencyHigh);
-    lowFilter.setHighpass(false);
-    highFilter.setHighpass(true);
+    lowFilter.setHighpass(true);
+    highFilter.setHighpass(false);
 
     lowFilter.processBlock(buffer, midiMessages);
     highFilter.processBlock(buffer, midiMessages);
