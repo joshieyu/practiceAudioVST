@@ -55,7 +55,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     addAndMakeVisible (irName);
 
-    setSize (4 * paramWidth, paramHeight);
+    setSize (5 * paramWidth, paramHeight);
 
 }
 
@@ -108,20 +108,47 @@ void PluginEditor::resized()
 
     auto r = getLocalBounds();
 
-    auto gainRect = r.removeFromLeft (paramWidth);
-    invertButton.setBounds(gainRect.removeFromBottom(buttonHeight));
-    gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
+    // auto gainRect = r.removeFromLeft (paramWidth);
+    // invertButton.setBounds(gainRect.removeFromBottom(buttonHeight));
+    // gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
+    // gainSlider.setBounds (gainRect);
+
+    // auto lowFilterRect = r. removeFromLeft(paramWidth);
+    // cutoffFrequencyLabelLow.setBounds(lowFilterRect.removeFromBottom(buttonHeight));
+    // cutoffFrequencySliderLow.setBounds(lowFilterRect);
+
+    // auto highFilterRect = r. removeFromLeft(paramWidth);
+    // cutoffFrequencyLabelHigh.setBounds(highFilterRect.removeFromBottom(buttonHeight));
+    // cutoffFrequencySliderHigh.setBounds(highFilterRect);
+
+    // auto reverbRect = r.removeFromLeft (paramWidth);
+    // openButton.setBounds (reverbRect.removeFromBottom (200));
+    // irName.setBounds (reverbRect.removeFromBottom (40));
+
+    const auto openButtonX = getWidth() * JUCE_LIVE_CONSTANT(0.075);
+    const auto openButtonY = getHeight() * JUCE_LIVE_CONSTANT(0.34);
+    const auto openButtonWidth = getWidth() * JUCE_LIVE_CONSTANT(0.2);
+    const auto openButtonHeight = getHeight() * JUCE_LIVE_CONSTANT(0.3);
+
+    const auto irNameYOffset = JUCE_LIVE_CONSTANT(30);
+
+    openButton.setBounds(openButtonX, openButtonY, openButtonWidth, openButtonHeight);
+    irName.setBounds(openButtonX, openButtonY + irNameYOffset, openButtonWidth, openButtonHeight + irNameYOffset + 50);
+
+    // auto knobRect = r.removeFromBottom (paramHeight);
+    auto knobRect = r;
+    
+    auto gainRect = knobRect.removeFromRight (paramWidth);
     gainSlider.setBounds (gainRect);
+    gainLabel.setBounds (gainRect.removeFromBottom (buttonHeight));
 
-    auto lowFilterRect = r. removeFromLeft(paramWidth);
-    cutoffFrequencyLabelLow.setBounds(lowFilterRect.removeFromBottom(buttonHeight));
-    cutoffFrequencySliderLow.setBounds(lowFilterRect);
-
-    auto highFilterRect = r. removeFromLeft(paramWidth);
-    cutoffFrequencyLabelHigh.setBounds(highFilterRect.removeFromBottom(buttonHeight));
+    auto highFilterRect = knobRect. removeFromRight(paramWidth);
     cutoffFrequencySliderHigh.setBounds(highFilterRect);
+    cutoffFrequencyLabelHigh.setBounds(highFilterRect.removeFromBottom(buttonHeight));
 
-    auto reverbRect = r.removeFromLeft (paramWidth);
-    openButton.setBounds (reverbRect.removeFromBottom (200));
-    irName.setBounds (reverbRect.removeFromBottom (40));
+    auto lowFilterRect = knobRect. removeFromRight(paramWidth);
+    cutoffFrequencySliderLow.setBounds(lowFilterRect);
+    cutoffFrequencyLabelLow.setBounds(lowFilterRect.removeFromBottom(buttonHeight));
+
+    invertButton.setBounds(knobRect.removeFromRight(JUCE_LIVE_CONSTANT(80)));
 }

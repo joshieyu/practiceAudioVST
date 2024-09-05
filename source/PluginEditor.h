@@ -22,8 +22,8 @@ public:
 
     enum {
         paramWidth = 200,
-        paramHeight = 500,
-        buttonHeight = 50
+        paramHeight = 300,
+        buttonHeight = 150
     };
 
 private:
